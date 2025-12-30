@@ -15,28 +15,48 @@ const Index = () => {
 
   // 2. Main Analysis Logic
   const handleAnalyze = async () => {
+    console.log("BUTTON CLICKED! Checking inputs..."); // Debug Log 1
+
     if (!file || !jd) {
+      console.log("Inputs missing:", { file, jd });
       alert("Please upload a resume and enter a job description!");
       return;
     }
 
+    console.log("Inputs OK. Starting fetch to backend..."); // Debug Log 2
     setIsLoading(true);
-    
-    // Simulate Backend Call
-    setTimeout(() => {
-      setResults({
-        score: 87,
-        summary: "Strong candidate with required Python & React experience.",
-        missingSkills: ["AWS", "Docker"],
-        matchedSkills: ["React", "TypeScript", "Tailwind CSS"],
-        personalInfo: {
-            name: "Candidate Name",
-            email: "candidate@email.com",
-            phone: "+1 234 567 890"
-        }
+    setResults(null); // Clear previous results
+
+    try {
+      // 1. Create Form Data
+      const formData = new FormData();
+      formData.append("resume", file);
+      formData.append("job_description", jd);
+
+      // 2. Send to Python Backend
+      // Using 127.0.0.1 to avoid Windows localhost issues
+      const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        body: formData,
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Analysis failed: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log("Data received from backend:", data); // Debug Log 3
+
+      // 3. Save Real Data
+      setResults(data);
+
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Failed to connect to the backend. Check console for details.");
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
