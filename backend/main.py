@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+
 # Internal imports
 from parser.pdfextractor import extract_text_from_pdf
 from parser.resume_decoder import decode_resume

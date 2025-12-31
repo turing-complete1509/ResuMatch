@@ -1,26 +1,31 @@
 import os
 from neo4j import GraphDatabase
 
-URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+URI = os.getenv("NEO4J_URI")
 USER = os.getenv("NEO4J_USER", "neo4j")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
+DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
 
 driver = None
 
-# Hackathon Fix: Only connect if password exists, otherwise skip
-if PASSWORD:
+if PASSWORD and URI:
     try:
-        driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+        driver = GraphDatabase.driver(
+            URI,
+            auth=(USER, PASSWORD),
+            max_connection_lifetime=200,
+            connection_timeout=15
+        )
+        print("Connected to Neo4j Aura")
     except Exception as e:
-        print(f"Warning: Neo4j connection failed: {e}")
+        print(f"Neo4j Aura connection failed: {e}")
 else:
-    print("Warning: NEO4J_PASSWORD not set. Running in 'Offline Mode' (Graph features disabled).")
+    print("Neo4j credentials missing. Running in offline mode.")
 
 def run_query(query, params=None):
-    # If driver is None (offline mode), return empty list so code doesn't break
     if not driver:
         return []
-        
-    with driver.session() as session:
+
+    with driver.session(database=DATABASE) as session:
         result = session.run(query, params or {})
         return [record.data() for record in result]
