@@ -1,11 +1,12 @@
 import re
-
 KNOWN_SKILLS = [
     "python", "java", "sql", "django", "flask",
     "machine learning", "deep learning", "cnn",
-    "nlp", "react", "node", "docker"
+    "nlp", "react", "node", "docker", "typescript", "javascript",
+    "html", "css", "c++", "c", "git", "aws", "azure", "kubernetes",
+    "rest", "graphql", "redux", "zustand", "fastapi", "linux",
+    "agile", "scrum", "mathematics", "data science"
 ]
-
 KNOWN_ROLES = [
     "software engineer",
     "backend developer",
@@ -13,22 +14,18 @@ KNOWN_ROLES = [
     "machine learning engineer",
     "ai engineer"
 ]
-
 def extract_skills(text: str):
     text = text.lower()
     return [s for s in KNOWN_SKILLS if s in text]
-
 def extract_role(text: str):
     text = text.lower()
     for role in KNOWN_ROLES:
         if role in text:
             return role
     return None
-
 def extract_min_experience(text: str):
     matches = re.findall(r'(\d+)\s*[-+]?\s*\d*\s*years', text.lower())
     return int(min(matches)) if matches else 0
-
 def decode_jd(text: str):
     return {
         "role": extract_role(text),
