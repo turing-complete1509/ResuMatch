@@ -5,80 +5,41 @@ import { JobDescriptionInput } from "@/components/dashboard/JobDescriptionInput"
 import { ResultsPanel } from "@/components/dashboard/ResultsPanel";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-
 const Index = () => {
   const [file, setFile] = useState<File | null>(null);
   const [jd, setJd] = useState("");
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const handleAnalyze = async () => {
-    console.log("Starting mock analysis...");
+    if (!file || !jd) {
+      if (!file) console.error("No file selected");
+      if (!jd) console.error("No job description entered");
+      return;
+    }
+    console.log("Starting analysis...");
     setIsLoading(true);
     setResults(null);
-
-    // --- MOCK DATA GENERATION START ---
-    const dummyData = {
-      personalInfo: {
-        name: "Ayush Pratap Singh",
-        email: "ayushsingh15092005@gmail.com",
-        phone: "+91 7239091225",
-        links: ["linkedin.com/in/turing-complete1509"]
-      },
-      // Resume content parsed from PDF
-      education: [
-        {
-          degree: "B.Tech in Mathematics and Data Science",
-          school: "Maulana Azad National Institute of Technology, Bhopal",
-          year: "2024-2028",
-          score: "CGPA: 9.57"
-        },
-        {
-          degree: "Class XII (PCM)",
-          school: "Royal International School",
-          year: "2023",
-          score: "91.2%"
-        }
-      ],
-      experience: [
-        {
-          role: "Web Developer",
-          company: "Indian Society for Technical Education",
-          duration: "July 2025 - Present",
-          description: "Collaborated to design a feature-rich website for Version Beta Hackathon. Facilitated workshops on DSA and Web Development."
-        }
-      ],
-      projects: [
-        {
-          name: "Krishi-Mate",
-          tech: "ReactJS, FastAPI, TypeScript",
-          description: "AI-Powered Agricultural Platform with real-time crop predictions using Hugging Face models."
-        },
-        {
-          name: "Pokémon Evolution Finder",
-          tech: "HTML, CSS, JavaScript",
-          description: "Interactive dashboard using PokéAPI to display evolution data."
-        }
-      ],
-      achievements: [
-        "National Semi-Finalist Flipkart Grid 7.0",
-        "Codeforces Pupil (Max Rating: 1261)",
-        "LeetCode Contest Rating 1709",
-        "Solved 750+ DSA problems"
-      ],
-      // Analysis Data
-      score: 72, 
-      matchedSkills: ["React.js", "TypeScript", "JavaScript", "Git", "REST APIs", "Modern CSS"],
-      missingSkills: ["5+ Years Experience", "Redux/Zustand", "GraphQL", "Senior Level Leadership"]
-    };
-    // --- MOCK DATA GENERATION END ---
-
-    setTimeout(() => {
-      setResults(dummyData);
+    const formData = new FormData();
+    formData.append("resume", file);
+    formData.append("job_description", jd);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/analyze`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      // Ideally show a toast here, but for now console error is enough as per current scope
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
-
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <motion.header
@@ -103,7 +64,6 @@ const Index = () => {
           </div>
         </div>
       </motion.header>
-
       <main className="container mx-auto px-6 py-8">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -118,12 +78,10 @@ const Index = () => {
             Upload resumes, paste job descriptions, and get instant AI-powered match scores.
           </p>
         </motion.div>
-
         <div className="grid gap-6 lg:grid-cols-2 mb-8">
           <ResumeUpload file={file} setFile={setFile} />
           <JobDescriptionInput value={jd} onChange={setJd} />
         </div>
-
         <div className="flex justify-center mb-12">
           <Button 
             size="lg" 
@@ -135,7 +93,6 @@ const Index = () => {
             {isLoading ? "Analyzing..." : "Analyze Resume Match"}
           </Button>
         </div>
-
         {results && (
           <motion.div
             initial={{ y: 40, opacity: 0 }}
@@ -149,5 +106,4 @@ const Index = () => {
     </div>
   );
 };
-
 export default Index;

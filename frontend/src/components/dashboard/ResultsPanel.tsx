@@ -1,30 +1,24 @@
 import { motion } from "framer-motion";
-import { 
+import {
   User, Mail, Phone, Briefcase, GraduationCap, Trophy, Code,
   CheckCircle, XCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MatchScoreRing } from "./MatchScoreRing";
-
 interface ResultsPanelProps {
-  data: any; 
+  data: any;
 }
-
 export const ResultsPanel = ({ data }: ResultsPanelProps) => {
   if (!data) return null;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="h-1 w-8 rounded-full bg-primary" />
         <h2 className="text-2xl font-bold text-foreground">Analysis Results</h2>
       </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
-        
         {/* === LEFT COLUMN: Candidate Details === */}
         <div className="lg:col-span-2 space-y-6">
-          
           {/* 1. Personal Info */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
@@ -49,7 +43,6 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
               </div>
             </div>
           </motion.div>
-
           {/* 2. Experience Section */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
@@ -63,23 +56,36 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
             </h3>
             <div className="space-y-4">
               {data.experience?.map((exp: any, i: number) => (
-                <div key={i} className="relative pl-4 border-l-2 border-primary/20 last:pb-0">
-                  <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
-                  <div className="flex flex-wrap justify-between items-start gap-2">
-                    <h4 className="font-medium text-foreground">{exp.role}</h4>
-                    <span className="text-xs font-mono text-muted-foreground bg-secondary/50 px-2 py-1 rounded">
-                      {exp.duration}
-                    </span>
+                <div key={i} className="mb-6 last:mb-0 relative">
+                  {/* Timeline Dot */}
+                  <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
+                  <div className="pl-4 border-l-2 border-border/50 ml-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <h4 className="text-xl font-bold text-foreground">{exp.role}</h4>
+                      <span className="text-xs font-mono text-muted-foreground bg-secondary/50 px-2 py-1 rounded">
+                        {exp.duration}
+                      </span>
+                    </div>
+                    <p className="text-base text-primary font-medium mb-2">{exp.company}</p>
+                    
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc pl-4 space-y-1">
+                        {exp.description.map((line: string, li: number) => (
+                          <li key={li} className="text-sm text-muted-foreground leading-relaxed">
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {exp.description}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-sm text-primary font-medium">{exp.company}</p>
-                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                    {exp.description}
-                  </p>
                 </div>
               ))}
             </div>
           </motion.div>
-
           {/* 3. Projects & Education (Grid Layout) */}
           <div className="grid gap-6 md:grid-cols-2">
             
@@ -98,8 +104,8 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
                 {data.education?.map((edu: any, i: number) => (
                   <div key={i} className="border-b border-border/50 pb-3 last:border-0 last:pb-0">
                     <h4 className="text-sm font-semibold text-foreground">{edu.degree}</h4>
-                    <p className="text-xs text-muted-foreground">{edu.school}</p>
-                    <div className="mt-1 flex justify-between text-xs font-medium text-primary/80">
+                    <p className="text-xs text-secondary-foreground font-medium mb-1">{edu.school}</p>
+                    <div className="flex justify-between text-xs font-medium text-primary/80">
                       <span>{edu.year}</span>
                       <span>{edu.score}</span>
                     </div>
@@ -107,7 +113,6 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
                 ))}
               </div>
             </motion.div>
-
             {/* Projects */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -119,20 +124,40 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
                 <Code className="h-5 w-5 text-primary" />
                 Projects
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {data.projects?.map((proj: any, i: number) => (
-                  <div key={i} className="rounded-lg bg-secondary/20 p-3">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="text-sm font-semibold text-foreground">{proj.name}</h4>
+                  <div key={i} className="rounded-lg bg-secondary/10 p-4 border border-border/50">
+                    <div className="mb-3">
+                      <h4 className="text-base font-bold text-foreground mb-1">{proj.name}</h4>
+                      {/* Tech Stack as colored text line, similar to reference */}
+                      {Array.isArray(proj.tech) && proj.tech.length > 0 && (
+                        <p className="text-xs text-primary font-medium">
+                          {proj.tech.join(", ")}
+                        </p>
+                      )}
+                      {/* Fallback if tech is a string */}
+                      {!Array.isArray(proj.tech) && proj.tech && (
+                        <p className="text-xs text-primary font-medium">
+                          {proj.tech}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-xs text-primary/80 font-mono mb-2">{proj.tech}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{proj.description}</p>
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc pl-4 space-y-1">
+                        {proj.description.map((line: string, li: number) => (
+                          <li key={li} className="text-xs text-muted-foreground leading-relaxed">
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground line-clamp-3">{proj.description}</p>
+                    )}
                   </div>
                 ))}
               </div>
             </motion.div>
           </div>
-
           {/* 4. Achievements */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -153,9 +178,7 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
               ))}
             </div>
           </motion.div>
-
         </div>
-
         {/* === RIGHT COLUMN: Match Scores (Existing) === */}
         <motion.div
           initial={{ x: 20, opacity: 0 }}
@@ -173,11 +196,9 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
               {data.score > 70 ? "Strong Match" : "Moderate Match"}
             </p>
           </div>
-
           {/* Skill Analysis */}
           <div className="glass-card p-6">
             <h3 className="mb-4 text-lg font-semibold text-foreground">Skill Analysis</h3>
-            
             <div className="mb-4">
               <p className="text-sm font-medium text-green-600 flex items-center gap-1.5 mb-2">
                 <CheckCircle className="h-4 w-4" />
@@ -191,7 +212,6 @@ export const ResultsPanel = ({ data }: ResultsPanelProps) => {
                 ))}
               </div>
             </div>
-
             <div className="mb-4">
               <p className="text-sm font-medium text-red-600 flex items-center gap-1.5 mb-2">
                 <XCircle className="h-4 w-4" />
